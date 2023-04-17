@@ -10,6 +10,10 @@ app.use(bodyParser.json())
 
 app.use(cors())
 
+app.get('/', function (req, res) {
+    res.render('index', {});
+  });
+  
 //Payment Route for Stripe
 app.post("/payment", cors(), async(req, res) => {
     let {amount, id, description} = req.body
