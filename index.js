@@ -21,7 +21,8 @@ app.use(cors()) // Blocks browser from restricting any data
 app.get('/', function (req, res) {
     // res.render('index', {});
     res.send('Welcome to the BeautyLynk Express.JS server')
-    res.render('index', {});
+    // res.render('index', {});
+
 
 });
 
