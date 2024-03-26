@@ -8,10 +8,10 @@ const session = require("express-session");
 
 
 const twilio = require("twilio");
-// // Twilio Requirements
-// const accountSID = "ACe3074321d28362c4620dde9b1b34d13a";
-// const authToken = "11fc67f0cd7de03984ace350da1f19af";
-// const client = new twilio(accountSID, authToken);
+// Twilio Requirements
+const accountSID = "ACe3074321d28362c4620dde9b1b34d13a";
+const authToken = "11fc67f0cd7de03984ace350da1f19af";
+const client = new twilio(accountSID, authToken);
 
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
@@ -25,33 +25,33 @@ app.get('/', function (req, res) {
 
 });
 
-// app.post('/send-text', (req, res) => {
-//     // GET Variables, passed via query string
-//     let {recipient, textMessage } = req.body
-//     try {
-//         // console.log(recipient, textMessage)
-//         client.messages
-//             .create({
-//                 body: textMessage,
-//                 from: '+14786067242',
-//                 to: recipient
-//             })
-//             .then(message => {
-//                 console.log("Message: ", message)
-//                 res.json({
-//                     message: "Message successful",
-//                     success: true
-//                 })}
-//             )
-//             .done();
+app.post('/send-text', (req, res) => {
+    // GET Variables, passed via query string
+    let {recipient, textMessage } = req.body
+    try {
+        // console.log(recipient, textMessage)
+        client.messages
+            .create({
+                body: textMessage,
+                from: '+14786067242',
+                to: recipient
+            })
+            .then(message => {
+                console.log("Message: ", message)
+                res.json({
+                    message: "Message successful",
+                    success: true
+                })}
+            )
+            .done();
         
 
-//     } catch (error) {
-//         console.log("Error", error)
-//     }
-//     // Send Text
+    } catch (error) {
+        console.log("Error", error)
+    }
+    // Send Text
     
-// });
+});
 
 //Payment Route for Stripe
 app.post("/payment", cors(), async(req, res) => {
