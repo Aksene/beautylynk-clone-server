@@ -7,11 +7,11 @@ const cors = require("cors")
 const session = require("express-session");
 
 
-// const twilio = require("twilio");
-// // Twilio Requirements
-// const accountSID = "ACe3074321d28362c4620dde9b1b34d13a";
-// const authToken = "11fc67f0cd7de03984ace350da1f19af";
-// const client = new twilio(accountSID, authToken);
+const twilio = require("twilio");
+// Twilio Requirements
+const accountSID = "ACe3074321d28362c4620dde9b1b34d13a";
+const authToken = "11fc67f0cd7de03984ace350da1f19af";
+const client = new twilio(accountSID, authToken);
 
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
@@ -25,33 +25,33 @@ app.get('/', function (req, res) {
 
 });
 
-// app.post('/send-text', (req, res) => {
-//     // GET Variables, passed via query string
-//     let {recipient, textMessage } = req.body
-//     try {
-//         // console.log(recipient, textMessage)
-//         client.messages
-//             .create({
-//                 body: textMessage,
-//                 from: '+14786067242',
-//                 to: recipient
-//             })
-//             .then(message => {
-//                 console.log("Message: ", message)
-//                 res.json({
-//                     message: "Message successful",
-//                     success: true
-//                 })}
-//             )
-//             .done();
+app.post('/send-text', (req, res) => {
+    // GET Variables, passed via query string
+    let {recipient, textMessage } = req.body
+    try {
+        // console.log(recipient, textMessage)
+        client.messages
+            .create({
+                body: textMessage,
+                from: '+14786067242',
+                to: recipient
+            })
+            .then(message => {
+                console.log("Message: ", message)
+                res.json({
+                    message: "Message successful",
+                    success: true
+                })}
+            )
+            .done();
         
 
-//     } catch (error) {
-//         console.log("Error", error)
-//     }
-//     // Send Text
+    } catch (error) {
+        console.log("Error", error)
+    }
+    // Send Text
     
-// });
+});
 
 //Payment Route for Stripe
 app.post("/payment", cors(), async(req, res) => {
@@ -81,6 +81,32 @@ app.post("/payment", cors(), async(req, res) => {
     }
 
 })
+
+//Payout Route for Stripe
+app.post("/payout", cors(), async(req, res) => {
+  let {amount, stripeConnect} = req.body
+
+  try{
+    const transfer = await stripe.transfers.create({
+      amount: amount,
+      currency: "usd",
+      destination: stripeConnect,
+    });
+    console.log("Payout: ", transfer)
+    res.json({
+        message: "Payout successful",
+        success: true,
+        payout: transfer
+    })
+  } catch(error) {
+    console.log("Error", error)
+    res.json({
+        message: "Payout failed",
+        success: false
+    })
+  }
+})
+
 
 //Refund Route for Stripe
 app.post("/refund", cors(), async(req, res) => {
@@ -126,11 +152,14 @@ app.post("/onboard-user", async (req, res) => {
       req.session.accountID = account.id;
   
       const origin = `${req.headers.origin}`;
+      console.log("Origin: ", origin)
+      console.log("Refresh URL: ", `${origin}/onboard-user/refresh`)
+      console.log("Return URL: ", `${origin}/dashboard?accID=${account.id}`)
       const accountLink = await stripe.accountLinks.create({
         type: "account_onboarding",
         account: account.id,
         refresh_url: `${origin}/onboard-user/refresh`,
-        return_url: `${origin}/dashboard?accID=${account.id}`,
+        return_url: `${origin}/dashboard`,
       });
   
       console.log("Normal req: ",req)
